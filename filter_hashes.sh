@@ -35,6 +35,6 @@ fi
 find "$DIR" -type f -print0 | while IFS= read -r -d '' file; do
   hash=$(git hash-object "$file")
   if ! grep -Fxq "$hash" "$HASH_FILE"; then 
-    echo "$file"
+    echo "$(realpath "$file")"
   fi
 done
