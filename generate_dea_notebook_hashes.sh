@@ -2,8 +2,6 @@
 # creates file dea_notebook_file_hashes.txt
 # note, hashes are of the form: (`sha1("blob <file size>\0<file content>")`)
 
-set -euo pipefail
-
 # Save the current directory
 ORIGINAL_DIR="$(pwd)"
 
