@@ -1,7 +1,5 @@
 # filters out any files which don't match git hashes found in hash file
 
-set -euo pipefail
-
 usage() {
   echo "Usage: $0 HASH_FILE [DIRECTORY]"
   echo
