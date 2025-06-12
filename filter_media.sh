@@ -1,7 +1,5 @@
 # filters given file paths for image and video files
 
-set -euo pipefail
-
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 PATHS_FILE"
   echo "  PATHS_FILE: File containing newline-separated list of paths to check"
