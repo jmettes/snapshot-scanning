@@ -1,8 +1,8 @@
 # Reads through list of snapshot ID:
 # - downloads snapshot image using coldsnap
 # - mounts image
-# - filters files against existing notebook file hashes
 # - filters media files
+# - filters files against existing notebook file hashes
 
 if [ $# -ne 2 ]; then
   echo "Usage: $0 SNAPSHOT_LIST_FILE HASH_FILE"
