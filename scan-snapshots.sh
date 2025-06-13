@@ -27,8 +27,8 @@ while read -r SNAPSHOT_ID; do
 
   SNAPSHOT_FILE="${SNAPSHOT_ID}.img"
   SNAPSHOT_DIR="${SNAPSHOT_ID}-mount"
-  SNAPSHOT_FILTERED_FILE="${SNAPSHOT_ID}-files.txt"
   SNAPSHOT_MEDIA_FILE="${SNAPSHOT_ID}-media.txt"
+  SNAPSHOT_FILTERED_FILE="${SNAPSHOT_ID}-files.txt"
 
   echo "Processing snapshot: $SNAPSHOT_ID"
 
@@ -48,8 +48,9 @@ while read -r SNAPSHOT_ID; do
   sudo mount -o loop "$SNAPSHOT_FILE" "$SNAPSHOT_DIR"
 
   # Filter files
-  ./filter_hashes.sh "$HASH_FILE" "$SNAPSHOT_DIR" > "$SNAPSHOT_FILTERED_FILE"
-  ./filter_media.sh "$SNAPSHOT_FILTERED_FILE" > "$SNAPSHOT_MEDIA_FILE"
+  # turns out it's faster to find all media files first, then to filter out dea notebook hashed files on a reduced set of files (because calculating hashes is more expensive)
+  ./filter_media.sh "$SNAPSHOT_DIR" > "$SNAPSHOT_MEDIA_FILE"
+  ./filter_hashes.sh "$SNAPSHOT_MEDIA_FILE" "$HASH_FILE" > "$SNAPSHOT_FILTERED_FILE"
 
   # Success; remove trap so cleanup doesn't re-run
   trap - EXIT
