@@ -1,38 +1,32 @@
-# filters out any files which don't match git hashes found in hash file
+# filters out any files which don't match git hashes found in hash file (note hashes are git hashes, of the form `blob <size string>\0<data>`)
 
-usage() {
-  echo "Usage: $0 HASH_FILE [DIRECTORY]"
-  echo
-  echo "Find files in DIRECTORY (default: current dir) not listed by hash in HASH_FILE."
-  echo
-  echo "Arguments:"
-  echo "  HASH_FILE   File with one git hash per line (REQUIRED)"
-  echo "  DIRECTORY   Directory to scan (optional, defaults to .)"
+# Usage instructions
+if [[ $# -lt 2 ]]; then
+  echo "Usage: $0 <FILES_LIST> <HASH_FILE>" >&2
   exit 1
-}
-
-# Accept 1 or 2 arguments
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Error: Invalid number of arguments."
-  usage
 fi
 
-HASH_FILE="$1"
-DIR="${2:-.}"
+FILES_LIST="$1"
+HASH_FILE="$2"
+
+# Check input files exist
+if [[ ! -f "$FILES_LIST" ]]; then
+  echo "Error: FILES_LIST '$FILES_LIST' not found." >&2
+  exit 1
+fi
 
 if [[ ! -f "$HASH_FILE" ]]; then
-  echo "Error: HASH_FILE '$HASH_FILE' does not exist."
+  echo "Error: HASH_FILE '$HASH_FILE' not found." >&2
   exit 1
 fi
 
-if [[ ! -d "$DIR" ]]; then
-  echo "Error: DIRECTORY '$DIR' does not exist."
-  exit 1
-fi
+export HASH_FILE
 
-find "$DIR" -type f -print0 | while IFS= read -r -d '' file; do
-  hash=$(git hash-object "$file")
-  if ! grep -Fxq "$hash" "$HASH_FILE"; then 
-    echo "$(realpath "$file")"
+xargs -a "$FILES_LIST" -n 1 -P "$(nproc)" -I {} bash -c '
+  file="{}"
+  [ -f "$file" ] || exit 0
+  hash=$(git hash-object "$file") || exit 0
+  if ! grep -Fxq "$hash" "$HASH_FILE"; then
+    realpath "$file"
   fi
-done
+'
