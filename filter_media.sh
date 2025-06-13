@@ -1,16 +1,20 @@
-# filters given file paths for image and video files
+# filters given directory for image and video files
 
-if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 PATHS_FILE"
-  echo "  PATHS_FILE: File containing newline-separated list of paths to check"
+# Check for input
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <FILES_DIR>" >&2
   exit 1
 fi
 
-PATHS_FILE="$1"
+FILES_DIR="$1"
 
-if [[ ! -f "$PATHS_FILE" ]]; then
-  echo "Error: File '$PATHS_FILE' does not exist."
+# Check that it's a directory
+if [[ ! -d "$FILES_DIR" ]]; then
+  echo "Error: '$FILES_DIR' is not a directory" >&2
   exit 1
 fi
 
-xargs -a "$PATHS_FILE" -d '\n' file --mime-type | grep -E 'image/|video/' | cut -d: -f1
+find "$FILES_DIR" -type f -print0 \
+  | xargs -0 -n 1 -P "$(nproc)" -I {} file --mime-type "{}" \
+  | grep -E 'image/|video/' \
+  | cut -d: -f1
